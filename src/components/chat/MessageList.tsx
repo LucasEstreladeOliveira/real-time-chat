@@ -56,7 +56,7 @@ export const MessageList = forwardRef<MessageListRef, MessageListProps>(({
                         <MessageBubble
                             key={message.id}
                             message={message}
-                            user={user}
+                            isUser={message.role === 'user'}
                             avatarUrl={avatarUrl}
                             title={title}
                             onMessageSeen={onMessageSeen}

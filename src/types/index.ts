@@ -7,7 +7,7 @@ export interface ChatMessage {
     isNew?: boolean;
 }
 
-export interface ChatTheme {
+export interface Theme {
     primaryColor?: string;
     secondaryColor?: string;
     accentColor?: string;
@@ -18,8 +18,8 @@ export interface ChatTheme {
 }
 
 export interface ChatWidgetProps {
-    usePremium?: boolean;
-    theme?: ChatTheme;
+    apiKey: string; // Required OpenAI API key
+    theme?: Theme;
     initialMessage?: string;
     position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     darkMode?: boolean;
@@ -28,9 +28,9 @@ export interface ChatWidgetProps {
     subtitle?: string;
     placeholder?: string;
     maxHeight?: string;
+    requireAuth?: boolean;
     onMessageSent?: (message: ChatMessage) => void;
     onMessageReceived?: (message: ChatMessage) => void;
-    requireAuth?: boolean;
 }
 
 export interface User {

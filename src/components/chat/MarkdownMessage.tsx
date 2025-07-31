@@ -13,7 +13,7 @@ interface CodeProps {
     node?: any;
     inline?: boolean;
     className?: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content, isUser }) => {

@@ -1,18 +1,21 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Theme } from '@radix-ui/themes';
-import { createChatService, ChatService, checkPremiumStatus } from '../utils/chatService';
+import { createChatService, ChatService } from '../utils/chatService';
 import { ChatMessage, ChatWidgetProps } from '../types';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { MessageProvider, useMessages } from '../contexts/MessageContext';
+import { OpenAIError } from '../utils/openai';
+import { checkMaintenanceStatus } from '../utils/maintenance';
 import { LoginForm } from './LoginForm';
 import { ChatHeader } from './chat/ChatHeader';
 import { MessageList, MessageListRef } from './chat/MessageList';
 import { ChatInput } from './chat/ChatInput';
 import '../styles/index.css';
+import { DefaultAvatar } from './DefaultAvatar';
 
 const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
-    usePremium = false,
+    apiKey,
     theme = {},
     initialMessage = "Hi! How can I help you today?",
     position = 'bottom-right',
@@ -32,23 +35,76 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [chatService, setChatService] = useState<ChatService | null>(null);
-    const [isPremiumAvailable, setIsPremiumAvailable] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [maintenanceStatus, setMaintenanceStatus] = useState<{
+        isUnderMaintenance: boolean;
+        message: string;
+        estimatedEndTime?: string;
+    } | null>(null);
+    const [isOnline, setIsOnline] = useState(true);
     const messageListRef = useRef<MessageListRef>(null);
 
-    // Initialize chat service and check premium status
+    // Check online status
     useEffect(() => {
-        const initChat = async () => {
-            const service = createChatService(usePremium);
-            setChatService(service);
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
 
-            if (usePremium) {
-                const isPremium = await checkPremiumStatus();
-                setIsPremiumAvailable(isPremium);
+        // Set initial status
+        setIsOnline(navigator.onLine);
+
+        // Add event listeners
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    // Check maintenance status periodically
+    useEffect(() => {
+        let isMounted = true;
+        let intervalId: number;
+
+        const checkStatus = async () => {
+            try {
+                const status = await checkMaintenanceStatus();
+                if (isMounted) {
+                    setMaintenanceStatus(maintenanceStatus);
+                }
+            } catch (error) {
+                console.error('Failed to check maintenance status:', error);
             }
         };
 
-        initChat();
-    }, [usePremium]);
+        // Initial check
+        checkStatus();
+
+        // Check every 5 minutes
+        intervalId = window.setInterval(checkStatus, 5 * 60 * 1000);
+
+        return () => {
+            isMounted = false;
+            window.clearInterval(intervalId);
+        };
+    }, []);
+
+    // Initialize chat service
+    useEffect(() => {
+        try {
+            const service = createChatService(apiKey);
+            setChatService(service);
+            setError(null);
+        } catch (error) {
+            console.error('Failed to initialize chat service:', error);
+            if (error instanceof OpenAIError) {
+                setError(error.message);
+            } else {
+                setError('Failed to initialize chat service. Please check your API key.');
+            }
+        }
+    }, [apiKey]);
 
     // Add initial message if no messages exist
     useEffect(() => {
@@ -81,7 +137,7 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
     }, [isOpen]);
 
     const sendMessage = useCallback(async (messageText: string) => {
-        if (!chatService || isLoading || isAuthLoading) return;
+        if (!chatService || isLoading || isAuthLoading || maintenanceStatus?.isUnderMaintenance || !isOnline) return;
 
         if (requireAuth && !user) {
             setShowLogin(true);
@@ -100,6 +156,7 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
         addMessage(userMessage);
         setInputValue('');
         setIsLoading(true);
+        setError(null);
         onMessageSent?.(userMessage);
         messageListRef.current?.scrollToBottom();
 
@@ -119,20 +176,40 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
             messageListRef.current?.scrollToBottom();
         } catch (error) {
             console.error('Failed to get response:', error);
-            const errorMessage: ChatMessage = {
+            let errorMessage = 'Sorry, I encountered an error. Please try again.';
+
+            if (error instanceof OpenAIError) {
+                switch (error.code) {
+                    case 'INVALID_KEY':
+                        errorMessage = 'Invalid API key. Please check your OpenAI API key.';
+                        break;
+                    case 'RATE_LIMIT':
+                        errorMessage = 'Rate limit exceeded. Please try again in a moment.';
+                        break;
+                    case 'SERVICE_ERROR':
+                        errorMessage = 'OpenAI service is currently unavailable. Please try again later.';
+                        break;
+                    case 'CONNECTION_ERROR':
+                        errorMessage = 'Failed to connect to OpenAI. Please check your internet connection.';
+                        break;
+                }
+            }
+
+            setError(errorMessage);
+            const errorResponse: ChatMessage = {
                 id: `error-${Date.now()}`,
-                content: 'Sorry, I encountered an error. Please try again.',
+                content: errorMessage,
                 role: 'assistant',
                 timestamp: new Date(),
                 userId: user?.id,
                 isNew: true,
             };
-            addMessage(errorMessage);
+            addMessage(errorResponse);
             messageListRef.current?.scrollToBottom();
         } finally {
             setIsLoading(false);
         }
-    }, [chatService, isLoading, isAuthLoading, requireAuth, user, addMessage, onMessageSent, onMessageReceived, setShowLogin]);
+    }, [chatService, isLoading, isAuthLoading, maintenanceStatus, isOnline, requireAuth, user, addMessage, onMessageSent, onMessageReceived, setShowLogin]);
 
     const handleLogout = useCallback(() => {
         logout();
@@ -153,7 +230,7 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
         messageListRef.current?.scrollToBottom();
     }, [updateMessage]);
 
-    const effectiveSubtitle = subtitle || (usePremium && isPremiumAvailable ? 'Powered by AI' : 'Free Tier');
+    const effectiveSubtitle = subtitle || 'Powered by AI';
 
     const positionStyles = {
         'bottom-right': { bottom: '20px', right: '20px' },
@@ -186,35 +263,30 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
                         className={`rounded-full bg-primary p-3 text-white shadow-lg hover:bg-accent transition-colors ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
                             }`}
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-6 h-6"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"
-                            />
-                        </svg>
+                        <DefaultAvatar size={24} className="text-white" />
                     </button>
 
                     <Dialog.Portal>
                         <Dialog.Overlay className="fixed inset-0 bg-black/50" />
                         <Dialog.Content
-                            className="fixed bottom-24 right-4 w-96 max-w-[calc(100vw-2rem)] rounded-2xl bg-background shadow-xl data-[state=open]:animate-contentShow flex flex-col"
+                            className="fixed bottom-24 right-4 w-96 max-w-[calc(100vw-2rem)] rounded-2xl bg-background shadow-xl data-[state=open]:animate-contentShow flex flex-col overflow-hidden"
                             style={{ height: maxHeight }}
                         >
                             <ChatHeader
                                 title={title}
-                                subtitle={effectiveSubtitle}
+                                subtitle={subtitle || 'Powered by AI'}
                                 onClose={() => setIsOpen(false)}
                                 user={user}
                                 onLogout={handleLogout}
+                                isOnline={isOnline}
                             />
+                            {error && (
+                                <div className="bg-red-50 border-l-4 border-red-400 p-4">
+                                    <p className="text-red-700 text-sm">
+                                        {error}
+                                    </p>
+                                </div>
+                            )}
                             <MessageList
                                 messages={currentMessages}
                                 isLoading={isLoading}
@@ -228,8 +300,10 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
                                 value={inputValue}
                                 onChange={setInputValue}
                                 onSend={sendMessage}
-                                placeholder={placeholder}
+                                placeholder={!isOnline ? 'Chat is offline. Please check your internet connection.' : placeholder}
                                 isLoading={isLoading}
+                                disabled={maintenanceStatus?.isUnderMaintenance || !isOnline}
+                                maintenanceStatus={maintenanceStatus}
                             />
                         </Dialog.Content>
                     </Dialog.Portal>

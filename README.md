@@ -1,26 +1,28 @@
 # Real-Time Chat Widget
 
-A beautiful, customizable, and easy-to-integrate chat widget for any website with AI capabilities. Inspired by the design of Eloquent AI.
+A modern, customizable chat widget that can be easily embedded into any website. Built with React, TypeScript, Tailwind CSS, and Radix UI.
 
 ## Features
 
-- 🎨 Beautiful and modern UI design
-- 🎭 Dark mode support
-- 🎨 Fully customizable themes
-- 🤖 AI-powered responses using OpenAI
-- 📱 Responsive and mobile-friendly
-- 🔧 Easy to integrate
-- ⚡ Real-time interactions
-- 🎯 Flexible positioning
-- 🔄 Message history
-- 🎉 Customizable avatar and branding
-- 🆓 Free tier with mock responses
-- 🔌 Framework-agnostic integration
+- 🚀 Easy Integration - Single function call to embed
+- 💅 Modern UI - Based on modern design principles
+- 🎨 Customizable Themes - Easily match your brand
+- 🤖 AI-Powered - OpenAI integration for intelligent responses
+- 📱 Responsive Design - Works on all devices
+- 🔒 Authentication Support - Optional user authentication
+- 💾 Message Persistence - Chat history saved in localStorage
+- ✨ Rich Text Support - Markdown rendering for messages
+- 🔄 Real-time Status - Online/offline indicator
+- ⚡ Typing Animation - Word-by-word message display
+- 🛠️ Maintenance Mode - Built-in maintenance status handling
+- 🎯 Auto-scroll - Automatic scroll to latest messages
 
 ## Installation
 
 ```bash
 npm install @lucasestrela/real-time-chat
+# or
+yarn add @lucasestrela/real-time-chat
 ```
 
 ## Quick Start
@@ -29,97 +31,126 @@ npm install @lucasestrela/real-time-chat
 import ChatAI from '@lucasestrela/real-time-chat';
 
 // Initialize the chat widget
-const unmount = ChatAI({
-  apiKey: 'your-openai-api-key', // Optional - if not provided, uses free tier
-  title: 'My Assistant',
+ChatAI({
+  apiKey: "your-openai-api-key", // Required
   theme: {
-    primaryColor: '#0066cc',
-    // ... other theme options
+    primary: '#007AFF',
+    accent: '#0056b3',
+    background: '#ffffff',
+    text: '#000000'
   },
+  title: 'Chat Assistant',
+  subtitle: 'Powered by AI',
+  position: 'bottom-right',
+  darkMode: false,
+  requireAuth: false,
+  maxHeight: '600px',
+  placeholder: 'Type your message...',
+  avatarUrl: 'https://your-avatar-url.com/image.png'
 });
-
-// To remove the widget (optional)
-unmount();
 ```
 
-### Using in HTML
+## Configuration Options
 
-```html
-<script type="module">
-  import ChatAI from 'https://unpkg.com/@lucasestrela/real-time-chat';
-
-  ChatAI({
-    apiKey: 'your-openai-api-key', // Optional
-    title: 'My Assistant',
-  });
-</script>
-```
-
-## Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| apiKey | string | undefined | Your OpenAI API key (optional - uses free tier if not provided) |
-| theme | ChatTheme | {} | Custom theme configuration |
-| initialMessage | string | "Hi! How can I help you today?" | Initial bot message |
-| position | 'bottom-right' \| 'bottom-left' \| 'top-right' \| 'top-left' | 'bottom-right' | Widget position |
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| apiKey | string | Required | Your OpenAI API key |
+| theme | object | {} | Custom theme colors |
+| title | string | 'Chat Assistant' | Widget title |
+| subtitle | string | 'Powered by AI' | Widget subtitle |
+| position | string | 'bottom-right' | Widget position |
 | darkMode | boolean | false | Enable dark mode |
-| avatarUrl | string | undefined | Custom avatar image URL |
-| title | string | "Chat Assistant" | Widget title |
-| subtitle | string | "Powered by AI" / "Free Tier" | Widget subtitle |
-| placeholder | string | "Type your message..." | Input placeholder |
-| maxHeight | string | "600px" | Maximum height of chat window |
-| onMessageSent | (message: ChatMessage) => void | undefined | Callback when message is sent |
-| onMessageReceived | (message: ChatMessage) => void | undefined | Callback when message is received |
+| requireAuth | boolean | false | Enable authentication |
+| maxHeight | string | '600px' | Maximum widget height |
+| placeholder | string | 'Type your message...' | Input placeholder |
+| avatarUrl | string | undefined | Custom avatar URL |
+| onMessageSent | function | undefined | Message sent callback |
+| onMessageReceived | function | undefined | Message received callback |
 
 ## Theme Customization
 
-You can customize the appearance of the chat widget by passing a theme object:
-
 ```javascript
 const theme = {
-  primaryColor: '#0066cc',
-  secondaryColor: '#f0f0f0',
-  accentColor: '#0052a3',
-  backgroundColor: '#ffffff',
-  textColor: '#000000',
-  spacing: '16px',
-  borderRadius: '12px',
+  primary: '#007AFF',    // Primary color for buttons and accents
+  accent: '#0056b3',     // Secondary color for hover states
+  background: '#ffffff', // Background color
+  text: '#000000'       // Text color
 };
+```
 
+## Features in Detail
+
+### Authentication
+- Optional user authentication system
+- Persistent sessions via localStorage
+- Secure message history per user
+- Easy login/logout functionality
+
+### Message Features
+- Markdown support for rich text
+- Word-by-word typing animation for AI responses
+- Message persistence across sessions
+- Automatic scroll to new messages
+- Read status tracking
+
+### Status Management
+- Real-time online/offline detection
+- Visual status indicator
+- Automatic handling of connection loss
+- Maintenance mode support with custom messages
+
+### UI/UX
+- Responsive design
+- Customizable themes
+- Dark mode support
+- Smooth animations
+- Loading indicators
+- Error handling with user-friendly messages
+
+## Events and Callbacks
+
+```javascript
 ChatAI({
-  apiKey: 'your-openai-api-key',
-  theme,
+  // ... other options
+  onMessageSent: (message) => {
+    console.log('Message sent:', message);
+  },
+  onMessageReceived: (message) => {
+    console.log('Message received:', message);
+  }
 });
 ```
 
-## Free vs Premium Tier
+## Error Handling
 
-The widget supports two tiers:
+The widget includes built-in error handling for:
+- Network connectivity issues
+- API errors
+- Authentication failures
+- Rate limiting
+- Service unavailability
 
-### Free Tier
-- No API key required
-- Pre-written responses
-- Basic functionality
-- "Free Tier" badge displayed
+## Browser Support
 
-### Premium Tier
-- Requires OpenAI API key
-- AI-powered responses
-- Full functionality
-- Professional branding
+Supports all modern browsers:
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
 ## Development
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Start development: `npm run dev`
-4. Build: `npm run build`
+To run the development environment:
 
-## License
-
-MIT
+```bash
+npm install
+npm run dev
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please read our contributing guidelines before submitting pull requests.
+
+## License
+
+MIT License - see LICENSE file for details
