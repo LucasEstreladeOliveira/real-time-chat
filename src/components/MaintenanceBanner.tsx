@@ -10,7 +10,7 @@ export const MaintenanceBanner: React.FC<MaintenanceBannerProps> = ({
     estimatedEndTime,
 }) => {
     return (
-        <div className="px-4 py-3 bg-amber-50 border-t border-amber-200 absolute bottom-full w-full">
+        <div className="px-4 py-3 bg-amber-50 border-y border-amber-200">
             <div className="flex items-start gap-2">
                 <div className="flex-shrink-0">
                     <svg

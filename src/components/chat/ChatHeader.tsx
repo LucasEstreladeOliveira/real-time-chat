@@ -4,7 +4,7 @@ import { StatusIndicator } from '../StatusIndicator';
 
 interface ChatHeaderProps {
     title: string;
-    subtitle: string;
+    subtitle?: string;
     user: User | null;
     onLogout: () => void;
     onClose: () => void;

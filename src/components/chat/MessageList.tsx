@@ -1,16 +1,13 @@
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { ChatMessage } from '../../types';
-import { User } from '../../utils/auth';
 import { MessageBubble } from './MessageBubble';
 import { LoadingBubble } from './LoadingBubble';
 
 interface MessageListProps {
     messages: ChatMessage[];
     isLoading: boolean;
-    user: User | null;
     avatarUrl?: string;
-    title: string;
     onMessageSeen?: (message: ChatMessage) => void;
 }
 
@@ -21,9 +18,7 @@ export interface MessageListRef {
 export const MessageList = forwardRef<MessageListRef, MessageListProps>(({
     messages,
     isLoading,
-    user,
     avatarUrl,
-    title,
     onMessageSeen,
 }, ref) => {
     const viewportRef = React.useRef<HTMLDivElement>(null);
@@ -49,7 +44,7 @@ export const MessageList = forwardRef<MessageListRef, MessageListProps>(({
     }, [messages, isLoading]);
 
     return (
-        <ScrollArea.Root className="flex-1 h-[400px]">
+        <ScrollArea.Root className="flex-1 min-h-0">
             <ScrollArea.Viewport ref={viewportRef} className="h-full w-full">
                 <div className="space-y-4 p-4">
                     {messages.map((message) => (
@@ -58,14 +53,12 @@ export const MessageList = forwardRef<MessageListRef, MessageListProps>(({
                             message={message}
                             isUser={message.role === 'user'}
                             avatarUrl={avatarUrl}
-                            title={title}
                             onMessageSeen={onMessageSeen}
                         />
                     ))}
                     {isLoading && (
                         <LoadingBubble
                             avatarUrl={avatarUrl}
-                            title={title}
                         />
                     )}
                 </div>

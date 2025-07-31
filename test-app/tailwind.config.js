@@ -3,7 +3,7 @@ export default {
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
-        "../src/**/*.{js,ts,jsx,tsx}" // Include the chat widget source
+        "../src/**/*.{js,ts,jsx,tsx}"
     ],
     theme: {
         extend: {},

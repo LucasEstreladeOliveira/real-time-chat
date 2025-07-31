@@ -1,12 +1,3 @@
-export interface ChatMessage {
-    id: string;
-    content: string;
-    role: 'user' | 'assistant';
-    timestamp: Date;
-    userId?: string;
-    isNew?: boolean;
-}
-
 export interface Theme {
     primaryColor?: string;
     secondaryColor?: string;
@@ -18,7 +9,7 @@ export interface Theme {
 }
 
 export interface ChatWidgetProps {
-    apiKey: string; // Required OpenAI API key
+    apiKey: string;
     theme?: Theme;
     initialMessage?: string;
     position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
@@ -28,15 +19,24 @@ export interface ChatWidgetProps {
     subtitle?: string;
     placeholder?: string;
     maxHeight?: string;
-    requireAuth?: boolean;
     onMessageSent?: (message: ChatMessage) => void;
     onMessageReceived?: (message: ChatMessage) => void;
+    requireAuth?: boolean;
 }
 
 export interface User {
+    id: string;
     email: string;
-    password: string;
     name: string;
+}
+
+export interface ChatMessage {
+    id: string;
+    content: string;
+    role: 'user' | 'assistant';
+    timestamp: Date;
+    userId?: string;
+    isNew?: boolean;
 }
 
 export interface MaintenanceStatus {
@@ -44,4 +44,8 @@ export interface MaintenanceStatus {
     message: string;
     estimatedEndTime?: string;
     error?: any;
+}
+
+export interface ChatService {
+    sendMessage: (message: string) => Promise<string>;
 }

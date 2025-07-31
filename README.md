@@ -1,28 +1,23 @@
 # Real-Time Chat Widget
 
-A modern, customizable chat widget that can be easily embedded into any website. Built with React, TypeScript, Tailwind CSS, and Radix UI.
+A beautiful and customizable real-time chat widget for React applications. Built with React, TypeScript, and Tailwind CSS.
 
 ## Features
 
-- 🚀 Easy Integration - Single function call to embed
-- 💅 Modern UI - Based on modern design principles
-- 🎨 Customizable Themes - Easily match your brand
-- 🤖 AI-Powered - OpenAI integration for intelligent responses
-- 📱 Responsive Design - Works on all devices
-- 🔒 Authentication Support - Optional user authentication
-- 💾 Message Persistence - Chat history saved in localStorage
-- ✨ Rich Text Support - Markdown rendering for messages
-- 🔄 Real-time Status - Online/offline indicator
-- ⚡ Typing Animation - Word-by-word message display
-- 🛠️ Maintenance Mode - Built-in maintenance status handling
-- 🎯 Auto-scroll - Automatic scroll to latest messages
+- 🎨 Beautiful UI with dark mode support
+- 🎯 Fully customizable themes
+- 📱 Responsive design
+- 🔒 Optional authentication support
+- 💬 Real-time messaging
+- 🔌 Easy integration with OpenAI
+- 🛠 Maintenance mode support
+- 📝 Markdown support
+- 🌐 Online/Offline status handling
 
 ## Installation
 
 ```bash
 npm install @lucasestrela/real-time-chat
-# or
-yarn add @lucasestrela/real-time-chat
 ```
 
 ## Quick Start
@@ -31,87 +26,94 @@ yarn add @lucasestrela/real-time-chat
 import ChatAI from '@lucasestrela/real-time-chat';
 
 // Initialize the chat widget
-ChatAI({
-  apiKey: "your-openai-api-key", // Required
+const unmount = ChatAI({
+  apiKey: "your-openai-api-key",
+  title: "Chat Assistant",
   theme: {
-    primary: '#007AFF',
-    accent: '#0056b3',
-    background: '#ffffff',
-    text: '#000000'
+    primaryColor: '#0066cc',
+    secondaryColor: '#f0f0f0',
+    accentColor: '#0052a3',
+    backgroundColor: '#ffffff',
+    textColor: '#000000',
+    spacing: '1rem',
+    borderRadius: '0.75rem'
   },
-  title: 'Chat Assistant',
-  subtitle: 'Powered by AI',
-  position: 'bottom-right',
-  darkMode: false,
-  requireAuth: false,
-  maxHeight: '600px',
-  placeholder: 'Type your message...',
-  avatarUrl: 'https://your-avatar-url.com/image.png'
+  darkMode: false
 });
+
+// To unmount the widget
+// unmount();
 ```
 
 ## Configuration Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| apiKey | string | Required | Your OpenAI API key |
-| theme | object | {} | Custom theme colors |
-| title | string | 'Chat Assistant' | Widget title |
-| subtitle | string | 'Powered by AI' | Widget subtitle |
-| position | string | 'bottom-right' | Widget position |
-| darkMode | boolean | false | Enable dark mode |
-| requireAuth | boolean | false | Enable authentication |
-| maxHeight | string | '600px' | Maximum widget height |
-| placeholder | string | 'Type your message...' | Input placeholder |
-| avatarUrl | string | undefined | Custom avatar URL |
-| onMessageSent | function | undefined | Message sent callback |
-| onMessageReceived | function | undefined | Message received callback |
+| `apiKey` | `string` | - | Your OpenAI API key |
+| `theme` | `Theme` | `{}` | Custom theme configuration |
+| `initialMessage` | `string` | "Hi! How can I help you today?" | Initial message shown in chat |
+| `position` | `'bottom-right' \| 'bottom-left' \| 'top-right' \| 'top-left'` | `'bottom-right'` | Widget position |
+| `darkMode` | `boolean` | `false` | Enable dark mode |
+| `avatarUrl` | `string` | - | Custom avatar URL |
+| `title` | `string` | "Chat Assistant" | Chat widget title |
+| `subtitle` | `string` | "Powered by AI" | Chat widget subtitle |
+| `placeholder` | `string` | "Type your message..." | Input placeholder |
+| `maxHeight` | `string` | "600px" | Maximum height of chat window |
+| `requireAuth` | `boolean` | `false` | Enable authentication |
+| `onMessageSent` | `(message: ChatMessage) => void` | - | Callback when message is sent |
+| `onMessageReceived` | `(message: ChatMessage) => void` | - | Callback when message is received |
 
 ## Theme Customization
 
 ```javascript
 const theme = {
-  primary: '#007AFF',    // Primary color for buttons and accents
-  accent: '#0056b3',     // Secondary color for hover states
-  background: '#ffffff', // Background color
-  text: '#000000'       // Text color
+  primaryColor: '#0066cc',    // Primary color for buttons and accents
+  secondaryColor: '#f0f0f0',  // Secondary color for backgrounds
+  accentColor: '#0052a3',     // Accent color for hover states
+  backgroundColor: '#ffffff', // Main background color
+  textColor: '#000000',      // Main text color
+  spacing: '1rem',           // Base spacing unit
+  borderRadius: '0.75rem'    // Border radius for components
 };
+
+ChatAI({
+  apiKey: "your-openai-api-key",
+  theme: theme
+});
 ```
 
-## Features in Detail
+## Authentication
 
-### Authentication
-- Optional user authentication system
-- Persistent sessions via localStorage
-- Secure message history per user
-- Easy login/logout functionality
-
-### Message Features
-- Markdown support for rich text
-- Word-by-word typing animation for AI responses
-- Message persistence across sessions
-- Automatic scroll to new messages
-- Read status tracking
-
-### Status Management
-- Real-time online/offline detection
-- Visual status indicator
-- Automatic handling of connection loss
-- Maintenance mode support with custom messages
-
-### UI/UX
-- Responsive design
-- Customizable themes
-- Dark mode support
-- Smooth animations
-- Loading indicators
-- Error handling with user-friendly messages
-
-## Events and Callbacks
+Enable authentication to require users to log in before using the chat:
 
 ```javascript
 ChatAI({
-  // ... other options
+  apiKey: "your-openai-api-key",
+  requireAuth: true
+});
+```
+
+Default demo credentials:
+- Email: user@example.com
+- Password: password123
+
+## Maintenance Mode
+
+The widget supports maintenance mode through custom events:
+
+```javascript
+// Enable maintenance mode
+window.dispatchEvent(new Event('maintenanceStatusActive'));
+
+// Disable maintenance mode
+window.dispatchEvent(new Event('maintenanceStatusInactive'));
+```
+
+## Event Callbacks
+
+```javascript
+ChatAI({
+  apiKey: "your-openai-api-key",
   onMessageSent: (message) => {
     console.log('Message sent:', message);
   },
@@ -121,36 +123,32 @@ ChatAI({
 });
 ```
 
-## Error Handling
-
-The widget includes built-in error handling for:
-- Network connectivity issues
-- API errors
-- Authentication failures
-- Rate limiting
-- Service unavailability
-
-## Browser Support
-
-Supports all modern browsers:
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
 ## Development
 
-To run the development environment:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm run install:all
+   ```
+3. Start development server:
+   ```bash
+   npm run dev
+   ```
+
+## Building
 
 ```bash
-npm install
-npm run dev
+npm run build
 ```
-
-## Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting pull requests.
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT © Lucas Estrela
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request

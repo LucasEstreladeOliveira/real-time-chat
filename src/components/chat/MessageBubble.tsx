@@ -10,7 +10,6 @@ interface MessageBubbleProps {
     message: ChatMessage;
     isUser: boolean;
     avatarUrl?: string;
-    title?: string;
     onMessageSeen?: (message: ChatMessage) => void;
 }
 
@@ -18,7 +17,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     message,
     isUser,
     avatarUrl,
-    title = 'AI',
     onMessageSeen,
 }) => {
     const [isTypingComplete, setIsTypingComplete] = useState(isUser || !message.isNew);
@@ -45,15 +43,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                     />
                 ) : (
                     <Avatar.Fallback className="w-8 h-8 rounded-full">
-                        <DefaultAvatar size={32} />
+                        <DefaultAvatar size={32} className='bg-primary p-2' />
                     </Avatar.Fallback>
                 )}
             </Avatar.Root>
             <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                 <div
                     className={`px-4 py-2 rounded-2xl max-w-[80%] ${isUser
-                            ? 'bg-primary text-white rounded-tr-sm'
-                            : 'bg-gray-100 text-gray-900 rounded-tl-sm'
+                        ? 'bg-primary text-white rounded-tr-sm'
+                        : 'bg-gray-100 text-gray-900 rounded-tl-sm'
                         }`}
                 >
                     {!isUser && !isTypingComplete ? (

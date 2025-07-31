@@ -1,5 +1,4 @@
 import React from 'react';
-import { MaintenanceBanner } from '../MaintenanceBanner';
 
 interface ChatInputProps {
     value: string;
@@ -39,19 +38,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     return (
         <div className="relative">
-            {maintenanceStatus?.isUnderMaintenance && (
-                <MaintenanceBanner
-                    message={maintenanceStatus.message}
-                    estimatedEndTime={maintenanceStatus.estimatedEndTime}
-                />
-            )}
             <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200">
                 <div className="flex items-center gap-2">
                     <input
                         type="text"
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
-                        onKeyPress={handleKeyPress}
+                        onKeyDown={handleKeyPress}
                         placeholder={maintenanceStatus?.isUnderMaintenance
                             ? 'Chat is temporarily unavailable due to maintenance'
                             : placeholder}

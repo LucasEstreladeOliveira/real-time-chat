@@ -6,7 +6,7 @@ interface UseLoginFormProps {
 }
 
 export const useLoginForm = ({ onSuccess }: UseLoginFormProps) => {
-    const { login, register, error: authError, clearError, setShowLogin, user } = useAuth();
+    const { login, register, error: authError, clearError, setShowLogin } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
