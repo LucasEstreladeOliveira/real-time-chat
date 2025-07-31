@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#chat-widget-root {
+    --chat-primary-color: var(--chat-primary-color, #0066cc);
+    --chat-secondary-color: var(--chat-secondary-color, #f0f0f0);
+    --chat-accent-color: var(--chat-accent-color, #0052a3);
+    --chat-background-color: var(--chat-background-color, #ffffff);
+    --chat-text-color: var(--chat-text-color, #000000);
+    --chat-spacing: var(--chat-spacing, 1rem);
+    --chat-border-radius: var(--chat-border-radius, 0.75rem);
+}
+
+.chat-widget {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.chat-widget.dark {
+    --chat-primary-color: theme('colors.blue.400');
+    --chat-secondary-color: theme('colors.gray.800');
+    --chat-accent-color: theme('colors.blue.300');
+    --chat-background-color: theme('colors.gray.900');
+    --chat-text-color: theme('colors.gray.100');
+}
+
+/* Ensure Tailwind classes use our CSS variables */
+.bg-primary {
+    background-color: var(--chat-primary-color) !important;
+}
+
+.bg-secondary {
+    background-color: var(--chat-secondary-color) !important;
+}
+
+.bg-accent {
+    background-color: var(--chat-accent-color) !important;
+}
+
+.bg-background {
+    background-color: var(--chat-background-color) !important;
+}
+
+.bg-text {
+    background-color: var(--chat-text-color) !important;
+}
+
+.text-text {
+    color: var(--chat-text-color) !important;
+}
+
+.hover\:bg-accent:hover {
+    background-color: var(--chat-accent-color) !important;
+}
+
+.border-secondary {
+    border-color: var(--chat-secondary-color) !important;
+}
+
+.rounded-chat {
+    border-radius: var(--chat-border-radius) !important;
+}
+
+/* Chat bubble animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-widget .group {
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Loading animation */
+@keyframes bouncePulse {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: translateY(-6px) scale(1);
+        opacity: 0.5;
+    }
+}
+
+.animate-bounce-pulse {
+    animation: bouncePulse 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform, opacity;
+}
+
+/* Ensure proper z-index for the widget */
+#chat-widget-root {
+    position: fixed;
+    z-index: 999999;
+    pointer-events: none;
+}
+
+#chat-widget-root>div {
+    pointer-events: auto;
+}
+
+/* Markdown content styles */
+.markdown-content {
+    line-height: 1.5;
+}
+
+.markdown-content>*:first-child {
+    margin-top: 0;
+}
+
+.markdown-content>*:last-child {
+    margin-bottom: 0;
+}
+
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.375rem;
+    margin: 0.5rem 0;
+}
+
+.markdown-content table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.markdown-content table th,
+.markdown-content table td {
+    border: 1px solid;
+    border-color: inherit;
+}
+
+.markdown-content pre {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.markdown-content code {
+    font-size: 0.875em;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+    padding-left: 1.5rem;
+}
+
+.markdown-content blockquote {
+    font-style: italic;
+    opacity: 0.9;
+}
+
+/* Typing cursor animation */
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.typing-cursor::after {
+    content: '|';
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    font-weight: 200;
+}
