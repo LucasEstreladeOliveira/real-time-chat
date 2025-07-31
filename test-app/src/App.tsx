@@ -74,9 +74,15 @@ function App() {
                 const unmount = ChatAI({
                     apiKey,
                     title: "AI Assistant",
+                    avatarUrl: "https://cdn-icons-png.flaticon.com/512/6858/6858504.png",
                     theme: themes[selectedTheme],
-                    darkMode: selectedTheme === 'dark',
                     requireAuth,
+                    onMessageSent: (message) => {
+                        console.log("Message sent:", message);
+                    },
+                    onMessageReceived: (message) => {
+                        console.log("Message received:", message);
+                    }
                 });
                 chatInstanceRef.current = unmount;
             }

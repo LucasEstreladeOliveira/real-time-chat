@@ -13,7 +13,6 @@ export interface ChatWidgetProps {
     theme?: Theme;
     initialMessage?: string;
     position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-    darkMode?: boolean;
     avatarUrl?: string;
     title?: string;
     subtitle?: string;

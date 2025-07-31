@@ -37,7 +37,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             <Avatar.Root className="flex-shrink-0">
                 {isUser ? (
                     <Avatar.Image
-                        className="w-8 h-8 rounded-full"
+                        className="w-8 h-8 rounded-full bg-primary"
                         src={avatarUrl || 'https://github.com/shadcn.png'}
                         alt="User"
                     />
@@ -49,9 +49,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             </Avatar.Root>
             <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                 <div
-                    className={`px-4 py-2 rounded-2xl max-w-[80%] ${isUser
-                        ? 'bg-primary text-white rounded-tr-sm'
-                        : 'bg-gray-100 text-gray-900 rounded-tl-sm'
+                    className={`px-4 py-2 rounded-2xl  ${isUser
+                        ? 'bg-primary text-white rounded-tr-sm max-w-[100%]'
+                        : 'bg-gray-100 text-gray-900 rounded-tl-sm max-w-[80%]'
                         }`}
                 >
                     {!isUser && !isTypingComplete ? (

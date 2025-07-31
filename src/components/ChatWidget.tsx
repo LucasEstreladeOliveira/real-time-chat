@@ -10,7 +10,6 @@ import { ChatWidgetWrapper } from './chat/ChatWidgetWrapper';
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
     apiKey,
     theme = {},
-    darkMode = false,
     position = 'bottom-right',
     title = 'Chat Assistant',
     subtitle,
@@ -40,12 +39,11 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     };
 
     return (
-        <div style={{ ...positionStyles[position], ...themeVars }}>
+        <div>
             <AuthProvider>
                 <MessageProvider>
                     <ChatUIProvider
                         theme={theme}
-                        darkMode={darkMode}
                         position={position}
                         title={title}
                         subtitle={subtitle}

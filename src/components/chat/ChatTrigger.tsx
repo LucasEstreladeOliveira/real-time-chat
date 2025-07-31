@@ -4,7 +4,6 @@ import { DefaultAvatar } from "../DefaultAvatar";
 export const ChatTrigger: React.FC = () => {
     const { isOpen, setIsOpen } = useChatUI();
 
-    console.log({ isOpen })
     return (
         <button
             onClick={() => setIsOpen(!isOpen)}

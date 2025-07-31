@@ -5,7 +5,6 @@ interface ChatUIContextType {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     theme: Theme;
-    darkMode: boolean;
     position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     title: string;
     subtitle?: string;
@@ -21,7 +20,6 @@ const ChatUIContext = createContext<ChatUIContextType | null>(null);
 interface ChatUIProviderProps {
     children: React.ReactNode;
     theme?: Theme;
-    darkMode?: boolean;
     position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     title?: string;
     subtitle?: string;
@@ -35,7 +33,6 @@ interface ChatUIProviderProps {
 export function ChatUIProvider({
     children,
     theme = {},
-    darkMode = false,
     position = 'bottom-right',
     title = 'Chat Assistant',
     subtitle,
@@ -51,7 +48,6 @@ export function ChatUIProvider({
         isOpen,
         setIsOpen,
         theme,
-        darkMode,
         position,
         title,
         subtitle,

@@ -10,13 +10,13 @@ import { ChatTrigger } from './ChatTrigger';
 
 export const ChatWidgetWrapper: React.FC = () => {
     const { showLogin, setShowLogin } = useAuth();
-    const { isOpen, setIsOpen, darkMode, position, positionStyles, themeVars } = useChatUI();
+    const { isOpen, setIsOpen, position, positionStyles, themeVars } = useChatUI();
     const { inputValue, sendMessage } = useChatState();
 
     return (
         <Theme>
             <div
-                className={`chat-widget fixed z-50 ${darkMode ? 'dark' : ''}`}
+                className={`chat-widget fixed z-50`}
                 style={{ ...positionStyles?.[position], ...themeVars }}
             >
                 <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
