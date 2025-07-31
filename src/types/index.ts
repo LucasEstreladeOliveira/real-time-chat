@@ -38,3 +38,10 @@ export interface User {
     password: string;
     name: string;
 }
+
+export interface MaintenanceStatus {
+    isUnderMaintenance: boolean;
+    message: string;
+    estimatedEndTime?: string;
+    error?: any;
+}

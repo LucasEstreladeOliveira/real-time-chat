@@ -6,7 +6,6 @@ import { ChatMessage, ChatWidgetProps } from '../types';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { MessageProvider, useMessages } from '../contexts/MessageContext';
 import { OpenAIError } from '../utils/openai';
-import { checkMaintenanceStatus } from '../utils/maintenance';
 import { LoginForm } from './LoginForm';
 import { ChatHeader } from './chat/ChatHeader';
 import { MessageList, MessageListRef } from './chat/MessageList';
@@ -62,31 +61,25 @@ const ChatWidgetContent: React.FC<ChatWidgetProps> = ({
         };
     }, []);
 
-    // Check maintenance status periodically
+    // Check maintenance status using event system
     useEffect(() => {
-        let isMounted = true;
-        let intervalId: number;
+        const handleMaintananceActive = () => setMaintenanceStatus({
+            isUnderMaintenance: true,
+            message: "System is under maintenance",
+            estimatedEndTime: new Date(new Date().getTime() + 30 * 60000).toLocaleTimeString(),
+        });
+        const handleMaintananceInactive = () => setMaintenanceStatus({
+            isUnderMaintenance: false,
+            message: "System is operational",
+        });
 
-        const checkStatus = async () => {
-            try {
-                const status = await checkMaintenanceStatus();
-                if (isMounted) {
-                    setMaintenanceStatus(maintenanceStatus);
-                }
-            } catch (error) {
-                console.error('Failed to check maintenance status:', error);
-            }
-        };
-
-        // Initial check
-        checkStatus();
-
-        // Check every 5 minutes
-        intervalId = window.setInterval(checkStatus, 5 * 60 * 1000);
+        // Add event listeners
+        window.addEventListener('maintenanceStatusActive', handleMaintananceActive);
+        window.addEventListener('maintenanceStatusInactive', handleMaintananceInactive);
 
         return () => {
-            isMounted = false;
-            window.clearInterval(intervalId);
+            window.removeEventListener('maintenanceStatusActive', handleMaintananceActive);
+            window.removeEventListener('maintenanceStatusInactive', handleMaintananceInactive);
         };
     }, []);
 

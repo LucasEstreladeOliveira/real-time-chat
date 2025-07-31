@@ -23,7 +23,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div>
                 <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">{title}</h2>
+                    <h2 className="text-lg font-semibold text-text">{title}</h2>
                     <StatusIndicator isOnline={isOnline} />
                 </div>
                 <p className="text-sm text-gray-500">{subtitle}</p>

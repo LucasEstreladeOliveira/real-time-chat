@@ -31,36 +31,11 @@ const themes = {
     },
 };
 
-const markdownExample = `
-# Hello! 👋
-
-I can help you with:
-- Writing code
-- Explaining concepts
-- Answering questions
-
-Here's a code example:
-\`\`\`javascript
-function greet(name) {
-    return \`Hello, \${name}!\`;
-}
-\`\`\`
-
-| Feature | Status |
-|---------|--------|
-| Markdown | ✅ |
-| Code blocks | ✅ |
-| Tables | ✅ |
-
-> I'm here to help!
-`;
-
 const STORAGE_KEY = 'chat-widget-api-key';
 
 function App() {
     const [selectedTheme, setSelectedTheme] = useState<keyof typeof themes>('blue');
     const [requireAuth, setRequireAuth] = useState(false);
-    const [showMarkdownExample, setShowMarkdownExample] = useState(false);
     const [apiKey, setApiKey] = useState(() => {
         try {
             return localStorage.getItem(STORAGE_KEY) || '';
@@ -100,8 +75,8 @@ function App() {
                     apiKey,
                     title: "AI Assistant",
                     theme: themes[selectedTheme],
+                    darkMode: selectedTheme === 'dark',
                     requireAuth,
-                    initialMessage: showMarkdownExample ? markdownExample : undefined,
                 });
                 chatInstanceRef.current = unmount;
             }
@@ -116,7 +91,7 @@ function App() {
                 chatInstanceRef.current = null;
             }
         };
-    }, [selectedTheme, requireAuth, showMarkdownExample, apiKey]);
+    }, [selectedTheme, requireAuth, apiKey]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -203,18 +178,6 @@ function App() {
                                 className="rounded"
                             />
                             <span>Require Authentication</span>
-                        </label>
-                    </div>
-
-                    <div>
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                checked={showMarkdownExample}
-                                onChange={(e) => setShowMarkdownExample(e.target.checked)}
-                                className="rounded"
-                            />
-                            <span>Show Markdown Example</span>
                         </label>
                     </div>
                 </div>
