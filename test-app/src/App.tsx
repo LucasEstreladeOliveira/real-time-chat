@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ChatAI from '../../src';
 
 const themes = {
@@ -8,177 +8,198 @@ const themes = {
         accentColor: '#0052a3',
         backgroundColor: '#ffffff',
         textColor: '#000000',
-        spacing: '16px',
-        borderRadius: '12px',
+        spacing: '1rem',
+        borderRadius: '0.75rem',
+    },
+    dark: {
+        primaryColor: '#6366f1',
+        secondaryColor: '#1f2937',
+        accentColor: '#4f46e5',
+        backgroundColor: '#111827',
+        textColor: '#ffffff',
+        spacing: '1rem',
+        borderRadius: '0.75rem',
     },
     green: {
-        primaryColor: '#10B981',
-        secondaryColor: '#F3F4F6',
-        accentColor: '#059669',
+        primaryColor: '#059669',
+        secondaryColor: '#f0fdf4',
+        accentColor: '#047857',
         backgroundColor: '#ffffff',
-        textColor: '#111827',
-        spacing: '16px',
-        borderRadius: '16px',
-    },
-    purple: {
-        primaryColor: '#8B5CF6',
-        secondaryColor: '#EDE9FE',
-        accentColor: '#7C3AED',
-        backgroundColor: '#ffffff',
-        textColor: '#1F2937',
-        spacing: '20px',
-        borderRadius: '20px',
+        textColor: '#000000',
+        spacing: '1rem',
+        borderRadius: '0.75rem',
     },
 };
 
-const markdownExample = `
-# Markdown Support
-
-This chat widget supports **Markdown** formatting! Here are some examples:
-
-## Text Formatting
-- *Italic text*
-- **Bold text**
-- ~~Strikethrough~~
-- \`inline code\`
-
-## Lists
-1. Ordered list item 1
-2. Ordered list item 2
-   - Nested unordered item
-   - Another nested item
-
-## Code Blocks
-\`\`\`javascript
-function greet(name) {
-  return \`Hello, \${name}!\`;
-}
-\`\`\`
-
-## Tables
-| Feature | Status |
-|---------|--------|
-| Markdown | ✅ |
-| Tables | ✅ |
-| Code blocks | ✅ |
-
-## Links and Blockquotes
-[Visit our website](https://example.com)
-
-> This is a blockquote.
-> It can span multiple lines.
-
----
-
-That's just a small sample of what you can do with Markdown!
-`;
+const STORAGE_KEY = 'chat-widget-api-key';
 
 function App() {
-    const [usePremium, setUsePremium] = useState(false);
     const [selectedTheme, setSelectedTheme] = useState<keyof typeof themes>('blue');
     const [requireAuth, setRequireAuth] = useState(false);
-    const [showMarkdownExample, setShowMarkdownExample] = useState(false);
+    const [apiKey, setApiKey] = useState(() => {
+        try {
+            return localStorage.getItem(STORAGE_KEY) || '';
+        } catch (error) {
+            console.error('Failed to load API key from localStorage:', error);
+            return '';
+        }
+    });
+    const [chatInitialized, setChatInitialized] = useState(() => Boolean(apiKey));
+    const chatInstanceRef = useRef<(() => void) | null>(null);
+
+    // Save API key to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            if (apiKey) {
+                localStorage.setItem(STORAGE_KEY, apiKey);
+            } else {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        } catch (error) {
+            console.error('Failed to save API key to localStorage:', error);
+        }
+    }, [apiKey]);
 
     useEffect(() => {
-        // Initialize chat widget
-        const unmount = ChatAI({
-            usePremium,
-            title: usePremium ? "Premium Assistant" : "Free Assistant",
-            theme: themes[selectedTheme],
-            requireAuth,
-            initialMessage: showMarkdownExample ? markdownExample : undefined,
-        });
+        let isMounted = true;
 
-        // Cleanup on unmount
-        return () => {
-            unmount();
+        const initChat = async () => {
+            if (!apiKey) return;
+
+            if (chatInstanceRef.current) {
+                chatInstanceRef.current();
+                chatInstanceRef.current = null;
+            }
+            if (isMounted) {
+                const unmount = ChatAI({
+                    apiKey,
+                    title: "AI Assistant",
+                    avatarUrl: "https://cdn-icons-png.flaticon.com/512/6858/6858504.png",
+                    theme: themes[selectedTheme],
+                    requireAuth,
+                    onMessageSent: (message) => {
+                        console.log("Message sent:", message);
+                    },
+                    onMessageReceived: (message) => {
+                        console.log("Message received:", message);
+                    }
+                });
+                chatInstanceRef.current = unmount;
+            }
         };
-    }, [usePremium, selectedTheme, requireAuth, showMarkdownExample]);
+
+        initChat().catch(console.error);
+
+        return () => {
+            isMounted = false;
+            if (chatInstanceRef.current) {
+                chatInstanceRef.current();
+                chatInstanceRef.current = null;
+            }
+        };
+    }, [selectedTheme, requireAuth, apiKey]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (apiKey.trim()) {
+            setApiKey(apiKey.trim());
+            setChatInitialized(true);
+        }
+    };
+
+    const handleReset = () => {
+        setApiKey('');
+        setChatInitialized(false);
+        if (chatInstanceRef.current) {
+            chatInstanceRef.current();
+            chatInstanceRef.current = null;
+        }
+    };
 
     return (
-        <div className="p-8">
-            <h1 className="text-4xl font-bold mb-8">Chat Widget Test Page</h1>
+        <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center">
+            <div className="w-full max-w-md space-y-4 bg-white rounded-lg p-6 shadow-lg">
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-2xl font-bold">Chat Widget Demo</h1>
+                    {chatInitialized && (
+                        <button
+                            onClick={handleReset}
+                            className="text-sm text-gray-600 hover:text-red-600"
+                        >
+                            Reset API Key
+                        </button>
+                    )}
+                </div>
 
-            <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-2xl font-semibold mb-4">Configuration</h2>
                 <div className="space-y-4">
-                    <div className="flex items-center space-x-4">
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                checked={usePremium}
-                                onChange={(e) => setUsePremium(e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span>Use Premium Tier (OpenAI)</span>
+                    {!chatInitialized && (
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    OpenAI API Key
+                                </label>
+                                <input
+                                    type="password"
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    placeholder="sk-..."
+                                    className="w-full px-3 py-2 border rounded-md"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Enter your OpenAI API key to start chatting
+                                </p>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={!apiKey.trim()}
+                                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Initialize Chat
+                            </button>
+                        </form>
+                    )}
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Theme
                         </label>
+                        <select
+                            value={selectedTheme}
+                            onChange={(e) => setSelectedTheme(e.target.value as keyof typeof themes)}
+                            className="w-full px-3 py-2 border rounded-md"
+                        >
+                            <option value="blue">Blue</option>
+                            <option value="dark">Dark</option>
+                            <option value="green">Green</option>
+                        </select>
                     </div>
 
-                    <div className="flex items-center space-x-4">
+                    <div>
                         <label className="flex items-center space-x-2">
                             <input
                                 type="checkbox"
                                 checked={requireAuth}
                                 onChange={(e) => setRequireAuth(e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="rounded"
                             />
                             <span>Require Authentication</span>
                         </label>
                     </div>
-
-                    <div className="flex items-center space-x-4">
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                checked={showMarkdownExample}
-                                onChange={(e) => setShowMarkdownExample(e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span>Show Markdown Example</span>
-                        </label>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="block font-medium text-gray-700">Theme</label>
-                        <div className="flex space-x-4">
-                            {(Object.keys(themes) as Array<keyof typeof themes>).map((themeName) => (
-                                <button
-                                    key={themeName}
-                                    onClick={() => setSelectedTheme(themeName)}
-                                    className={`px-4 py-2 rounded-md capitalize ${selectedTheme === themeName
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    {themeName}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="bg-gray-50 border-l-4 border-gray-400 p-4">
-                        <h3 className="font-semibold mb-2">Current Settings:</h3>
-                        <ul className="list-disc list-inside space-y-1 text-gray-600">
-                            <li>Mode: {usePremium ? 'Premium (OpenAI)' : 'Free Tier'}</li>
-                            <li>Theme: {selectedTheme}</li>
-                            <li>Authentication: {requireAuth ? 'Required' : 'Optional'}</li>
-                            <li>Markdown Example: {showMarkdownExample ? 'Enabled' : 'Disabled'}</li>
-                        </ul>
-                    </div>
-
-                    {requireAuth && (
-                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                            <p className="text-yellow-700">
-                                When authentication is required, use these demo credentials:
-                            </p>
-                            <p className="text-yellow-600 text-sm mt-2">
-                                Email: user@example.com<br />
-                                Password: password123
-                            </p>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {requireAuth && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                    <p className="text-yellow-700">
+                        When authentication is required, use these demo credentials:
+                    </p>
+                    <p className="text-yellow-600 text-sm mt-2">
+                        Email: user@example.com<br />
+                        Password: password123
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

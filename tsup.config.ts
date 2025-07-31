@@ -15,4 +15,7 @@ export default defineConfig({
             '.css': 'css',
         };
     },
+    async onSuccess() {
+        console.log('Build completed successfully!');
+    },
 }); 

@@ -1,13 +1,4 @@
-export interface ChatMessage {
-    id: string;
-    content: string;
-    role: 'user' | 'assistant';
-    timestamp: Date;
-    userId?: string;
-    isNew?: boolean;
-}
-
-export interface ChatTheme {
+export interface Theme {
     primaryColor?: string;
     secondaryColor?: string;
     accentColor?: string;
@@ -18,11 +9,10 @@ export interface ChatTheme {
 }
 
 export interface ChatWidgetProps {
-    usePremium?: boolean;
-    theme?: ChatTheme;
+    apiKey: string;
+    theme?: Theme;
     initialMessage?: string;
     position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-    darkMode?: boolean;
     avatarUrl?: string;
     title?: string;
     subtitle?: string;
@@ -34,7 +24,27 @@ export interface ChatWidgetProps {
 }
 
 export interface User {
+    id: string;
     email: string;
-    password: string;
     name: string;
+}
+
+export interface ChatMessage {
+    id: string;
+    content: string;
+    role: 'user' | 'assistant';
+    timestamp: Date;
+    userId?: string;
+    isNew?: boolean;
+}
+
+export interface MaintenanceStatus {
+    isUnderMaintenance: boolean;
+    message: string;
+    estimatedEndTime?: string;
+    error?: any;
+}
+
+export interface ChatService {
+    sendMessage: (message: string) => Promise<string>;
 }

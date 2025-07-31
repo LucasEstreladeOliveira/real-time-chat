@@ -1,21 +1,33 @@
 import React from 'react';
-import * as Avatar from '@radix-ui/react-avatar';
+import { DefaultAvatar } from '../DefaultAvatar';
 
 interface LoadingBubbleProps {
     avatarUrl?: string;
-    title: string;
+    title?: string;
 }
 
-export const LoadingBubble: React.FC<LoadingBubbleProps> = ({ avatarUrl, title }) => (
-    <div className="flex items-end gap-2">
-        <Avatar.Root className="w-6 h-6 rounded-full overflow-hidden bg-secondary flex-shrink-0 mb-1">
-            <Avatar.Image src={avatarUrl} alt={title} />
-            <Avatar.Fallback>AI</Avatar.Fallback>
-        </Avatar.Root>
-        <div className="bg-secondary text-text rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-2">
-            <div className="w-2 h-2 bg-text rounded-full animate-bounce-pulse" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-text rounded-full animate-bounce-pulse" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-text rounded-full animate-bounce-pulse" style={{ animationDelay: '300ms' }} />
+export const LoadingBubble: React.FC<LoadingBubbleProps> = ({
+    avatarUrl,
+    title = 'Assistant'
+}) => {
+    return (
+        <div className="group flex items-start gap-3 animate-fade-in">
+            <div className="flex-shrink-0">
+                {avatarUrl ? (
+                    <img src={avatarUrl} alt={title} className="w-8 h-8 rounded-full" />
+                ) : (
+                    <DefaultAvatar size={32} />
+                )}
+            </div>
+            <div className="flex-1 overflow-hidden">
+                <div className="bg-secondary rounded-2xl p-3 inline-block max-w-full">
+                    <div className="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-); 
+    );
+}; 

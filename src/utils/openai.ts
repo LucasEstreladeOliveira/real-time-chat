@@ -1,34 +1,68 @@
-import OpenAI from 'openai';
-import { ChatMessage } from '../types';
+import { ChatService } from './chatService';
 
-export class ChatAI {
-    private client: OpenAI;
-    private context: ChatMessage[] = [];
+interface OpenAIErrorResponse {
+    response?: {
+        status: number;
+        data?: {
+            error?: {
+                message?: string;
+            };
+        };
+    };
+    message?: string;
+}
+
+export class OpenAIError extends Error {
+    constructor(message: string, public code?: string) {
+        super(message);
+        this.name = 'OpenAIError';
+    }
+}
+
+export class ChatAI implements ChatService {
+    private apiKey: string;
+    private context: Array<{ role: 'user' | 'assistant'; content: string }> = [];
 
     constructor(apiKey: string) {
-        this.client = new OpenAI({ apiKey });
+        this.apiKey = apiKey;
     }
 
     async sendMessage(message: string): Promise<string> {
         try {
-            const completion = await this.client.chat.completions.create({
-                messages: [
-                    { role: 'system', content: 'You are a helpful AI assistant.' },
-                    ...this.context.map(msg => ({
-                        role: msg.role,
-                        content: msg.content
-                    })),
-                    { role: 'user', content: message }
-                ],
-                model: 'gpt-3.5-turbo',
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`,
+                },
+                body: JSON.stringify({
+                    model: 'gpt-3.5-turbo',
+                    messages: [
+                        ...this.context,
+                        { role: 'user', content: message }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000,
+                }),
             });
 
-            const response = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
+            if (!response.ok) {
+                const error: any = new Error('OpenAI API error');
+                error.response = response;
+                throw error;
+            }
+
+            const data = await response.json();
+            const assistantMessage = data.choices[0]?.message?.content;
+
+            if (!assistantMessage) {
+                throw new OpenAIError('No response from OpenAI', 'NO_RESPONSE');
+            }
 
             // Update context
             this.context.push(
-                { id: Date.now().toString(), content: message, role: 'user', timestamp: new Date() },
-                { id: (Date.now() + 1).toString(), content: response, role: 'assistant', timestamp: new Date() }
+                { role: 'user', content: message },
+                { role: 'assistant', content: assistantMessage }
             );
 
             // Keep context size manageable
@@ -36,14 +70,26 @@ export class ChatAI {
                 this.context = this.context.slice(-10);
             }
 
-            return response;
+            return assistantMessage;
         } catch (error) {
-            console.error('Error in AI response:', error);
-            throw new Error('Failed to get AI response');
+            const apiError = error as OpenAIErrorResponse;
+            if (apiError.response) {
+                const status = apiError.response.status;
+                switch (status) {
+                    case 401:
+                        throw new OpenAIError('Invalid API key. Please check your OpenAI API key.', 'INVALID_KEY');
+                    case 429:
+                        throw new OpenAIError('Rate limit exceeded. Please try again later.', 'RATE_LIMIT');
+                    case 500:
+                        throw new OpenAIError('OpenAI service error. Please try again later.', 'SERVICE_ERROR');
+                    default:
+                        throw new OpenAIError(
+                            `OpenAI API error: ${apiError.response.data?.error?.message || apiError.message || 'Unknown error'}`,
+                            'API_ERROR'
+                        );
+                }
+            }
+            throw new OpenAIError('Failed to connect to OpenAI. Please check your internet connection.', 'CONNECTION_ERROR');
         }
-    }
-
-    clearContext() {
-        this.context = [];
     }
 } 

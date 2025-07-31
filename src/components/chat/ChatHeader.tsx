@@ -1,12 +1,14 @@
 import React from 'react';
 import { User } from '../../utils/auth';
+import { StatusIndicator } from '../StatusIndicator';
 
 interface ChatHeaderProps {
     title: string;
-    subtitle: string;
+    subtitle?: string;
     user: User | null;
     onLogout: () => void;
     onClose: () => void;
+    isOnline?: boolean;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -15,11 +17,15 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     user,
     onLogout,
     onClose,
+    isOnline = true,
 }) => {
     return (
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div>
-                <h2 className="text-lg font-semibold">{title}</h2>
+                <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-text">{title}</h2>
+                    <StatusIndicator isOnline={isOnline} />
+                </div>
                 <p className="text-sm text-gray-500">{subtitle}</p>
             </div>
             <div className="flex items-center gap-2">
